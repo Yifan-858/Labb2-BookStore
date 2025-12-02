@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Do not commit config with local connection strings
+appsettings.json
+appsettings.Development.json
