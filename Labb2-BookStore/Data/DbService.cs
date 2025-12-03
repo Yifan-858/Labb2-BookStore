@@ -55,12 +55,97 @@ namespace Labb2_BookStore.Data
         //Read
         public async Task<List<Author>> GetAllAuthor()
         {
-            return await _context.Authors.ToListAsync();
+            try
+            {
+                return await _context.Authors.ToListAsync();
+            }
+            catch(Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"Database error: Could not fetch authors. Detail: {ex.Message}");
+                Console.ResetColor();
+
+                return new List<Author>();
+            }
+            
         }
 
         public async Task<List<Publisher>> GetAllPublisher()
         {
-            return await _context.Publishers.ToListAsync();
+            try
+            {
+                return await _context.Publishers.ToListAsync();
+            }
+            catch(Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"Database error: Could not fetch publishers. Detail: {ex.Message}");
+                Console.ResetColor();
+
+                return new List<Publisher>();
+            }
+            
+        }
+
+        public async Task<List<Store>> GetAllStore()
+        {
+            try
+            {
+                return await _context.Stores.ToListAsync();
+            }
+            catch(Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"Database error: Could not fetch stores. Detail: {ex.Message}");
+                Console.ResetColor();
+
+                return new List<Store>();
+            }
+            
+        }
+
+        public async Task<List<Inventory>> GetInventoryByStoreId(int storeId)
+        {
+            try
+            {
+                return await _context.Inventories.Where(i => i.StoreId == storeId).ToListAsync();
+            }
+            catch(Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"Database error: Could not fetch inventory. Detail: {ex.Message}");
+                Console.ResetColor();
+
+                return new List<Inventory>();
+            }
+            
+        }
+
+        public async Task<Book> GetBookByISBN(string isbn)
+        {
+            Book? book = null;
+
+            try
+            {
+                book = await _context.Books.Where(b => b.Isbn13 == isbn).FirstOrDefaultAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"Database error: Could not fetch book. Detail: {ex.Message}");
+                Console.ResetColor();
+
+                return null;
+            }
+
+            if(book == null)
+            {
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+                Console.WriteLine($"No book with ISBN:{isbn} is found. Please try again");
+                Console.ResetColor();
+            }
+
+            return book;
         }
     }
 }

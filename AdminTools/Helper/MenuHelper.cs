@@ -46,7 +46,8 @@ namespace AdminTools.Helper
             ConsoleKey keyPressed ;
 
             do
-            { 
+            {   
+                Console.ForegroundColor = ConsoleColor.Gray;
                 Console.Clear();
 
                 Console.WriteLine(Narrative);
