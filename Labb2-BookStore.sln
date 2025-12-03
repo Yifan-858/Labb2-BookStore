@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35825.156 d17.13
+VisualStudioVersion = 17.13.35825.156
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Labb2-BookStore", "Labb2-BookStore\Labb2-BookStore.csproj", "{A579C2D6-4CB4-46F5-82E6-4D452D0FA19F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdminTools", "AdminTools\AdminTools.csproj", "{27A9A687-8B49-4968-B94F-7C2DDC964E5F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{A579C2D6-4CB4-46F5-82E6-4D452D0FA19F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A579C2D6-4CB4-46F5-82E6-4D452D0FA19F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A579C2D6-4CB4-46F5-82E6-4D452D0FA19F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{27A9A687-8B49-4968-B94F-7C2DDC964E5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{27A9A687-8B49-4968-B94F-7C2DDC964E5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{27A9A687-8B49-4968-B94F-7C2DDC964E5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{27A9A687-8B49-4968-B94F-7C2DDC964E5F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
