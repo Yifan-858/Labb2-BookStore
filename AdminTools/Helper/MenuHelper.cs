@@ -34,8 +34,6 @@ namespace AdminTools.Helper
                 {
                     pointer = " ";
                 }
-            
-                Console.ResetColor();
 
                 Console.WriteLine($"{pointer} {Options[i]}");
             }
@@ -47,7 +45,6 @@ namespace AdminTools.Helper
 
             do
             {   
-                Console.ForegroundColor = ConsoleColor.Gray;
                 Console.Clear();
 
                 Console.WriteLine(Narrative);

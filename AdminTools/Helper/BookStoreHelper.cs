@@ -31,6 +31,24 @@ namespace AdminTools.Helper
             return newBook;
         }
 
+        public static async Task ViewStoreInventory(DbService db)
+        {
+            Console.Clear();
+
+            int storeId = await GetStoreList(db);
+
+            if (storeId == -1)
+            {
+                Console.WriteLine("No stores were found. Press any key to return.");
+                Console.ReadLine();
+                return;
+            }
+
+            Console.Clear();
+            Console.WriteLine("======== View Inventory ========");
+            await DisplayInventory(storeId, db);
+        }
+
         public static string GetValidIsbn13()
         {
             Console.WriteLine("Please enter the book ISBN13 e.g.978-1-52994-399-3:");
@@ -201,12 +219,75 @@ namespace AdminTools.Helper
 
             List<string> publishersOptions = publishers.Select(p => $"{p.PublisherId}. {p.PublisherName}").ToList();
 
-            MenuHelper publisherMenu = new MenuHelper("Please choose an Author:", publishersOptions);
+            MenuHelper publisherMenu = new MenuHelper("Please choose a publisher:", publishersOptions);
 
             int selectedIndex = publisherMenu.ControlChoice();
             int matchedAuthorId = publishers[selectedIndex].PublisherId;
 
             return matchedAuthorId;
+        }
+
+        public static async Task<int> GetStoreList(DbService db)
+        {
+            List<Store> stores = await db.GetAllStore();
+
+            if ( stores == null ||  stores.Count == 0)
+            {
+                Console.WriteLine("No stores found in the database. Create store first.");
+                return -1;
+            }
+
+            List<string> storeOptions = stores.Select(s => $"{s.StoreName}").ToList();
+
+            MenuHelper storeMenu = new MenuHelper("======== Choose a store ========",storeOptions);
+
+            int index = storeMenu.ControlChoice();
+            int storeId = stores[index].StoreId;
+
+            return storeId;
+        }
+
+        public static async Task DisplayInventory(int storeId, DbService db)
+        {
+            List<Inventory> inventories = await db.GetInventoryByStoreId(storeId);
+
+            if(inventories == null || inventories.Count == 0)
+            {
+                Console.WriteLine("No inventory is found associated to this store. Create inventory first.");
+            }
+
+            List<string> bookQuantities = inventories.Select(i => $"{i.Quantity}").ToList();
+            List<string> bookISBNs = inventories.Select(i => $"{i.Isbn13}").ToList();
+
+            var bookTasks = bookISBNs.Select(isbn => db.GetBookByISBN(isbn));
+            var bookArray = await Task.WhenAll(bookTasks);
+            List<Book> books = bookArray.ToList();
+
+            if(books == null || books.Count == 0)
+            {
+                Console.WriteLine("No book is found.");
+            }
+
+            var combinedData = inventories.Zip(books, (inventory, book) => new 
+            {
+                Inventory = inventory,
+                Book = book 
+            }).ToList();
+
+            if (combinedData.Count == 0)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("Inventory exists, but no matching books were found.");
+                Console.ResetColor();
+            }
+
+            List<string> inventoryBookTitleOption = combinedData.Select(info => $"Title: {info.Book.Title} - Quantity: {info.Inventory.Quantity} - ISBN: {info.Inventory.Isbn13}").ToList();
+
+            for(int i = 0; i < inventoryBookTitleOption.Count; i++)
+            {
+                Console.WriteLine($"{i + 1}.{inventoryBookTitleOption[i]}");
+            }
+            Console.WriteLine("---------------------------------");
         }
     }
 }
