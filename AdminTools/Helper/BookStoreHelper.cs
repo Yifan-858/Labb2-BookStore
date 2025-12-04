@@ -63,11 +63,49 @@ namespace AdminTools.Helper
 
             string result = await db.SendBookToStore(storeId, isbn, quantity);
             Console.ForegroundColor = ConsoleColor.DarkGreen;
-            Console.WriteLine($"{result}");
+            Console.WriteLine(result);
             Console.WriteLine("Order details:");
             Console.WriteLine($"Book: {isbn}");
             Console.WriteLine($"StoreID: {storeId}");
             Console.WriteLine($"Sent copies: {quantity}");
+            Console.ResetColor();
+            Console.WriteLine("--------------------------------------");
+            Console.WriteLine("Press any key to return");
+            Console.ReadKey();
+        }
+
+        public static async Task AddAuthor(DbService db)
+        {
+            Console.Clear();
+            Console.WriteLine("======== Add New Author ========");
+
+            Console.Write("Enter first name: ");
+            string firstName = Console.ReadLine()?.Trim();
+
+            Console.Write("Enter last name: ");
+            string lastName = Console.ReadLine()?.Trim();
+
+            DateOnly birthDate;
+            bool isValidDate = false;
+
+            do
+            {
+                Console.Write("Enter birth date (e.g. 1990-12-31): ");
+                string input = Console.ReadLine()?.Trim();
+
+                if (DateOnly.TryParseExact(input, "yyyy-MM-dd", null, System.Globalization.DateTimeStyles.None, out birthDate))
+                {
+                    isValidDate = true;
+                }
+                else
+                {
+                    Console.WriteLine("Invalid date format. Please use yyyy-MM-dd.");
+                }
+            } while (!isValidDate);
+
+            string result = await db.AddAuthor(firstName, lastName, birthDate);
+            Console.ForegroundColor = ConsoleColor.DarkGreen;
+            Console.WriteLine(result);
             Console.ResetColor();
             Console.WriteLine("--------------------------------------");
             Console.WriteLine("Press any key to return");
@@ -118,9 +156,29 @@ namespace AdminTools.Helper
                 return null;
             }
 
-            string isbnToUpdate = await GetInventory(storeId, db);
+            string isbn = await GetInventory(storeId, db);
 
-            return (isbnToUpdate,storeId);
+            return (isbn,storeId);
+        }
+
+        public static async Task DeleteBookFromStore(DbService db)
+        {
+            var data = await ViewStoreInventory(db);
+            string isbn = data.Value.isbnToUpdate;
+            int storeId = data.Value.storeId;
+            Console.WriteLine("--------------------------------------");
+            Console.WriteLine("Are you sure you want to delete this book permanently?");
+            Console.WriteLine("Press any key to confirm.");
+            Console.ReadKey();
+
+            var result = await db.DeleteBookFromInventory(isbn, storeId);
+
+            Console.ForegroundColor = ConsoleColor.DarkGreen;
+            Console.WriteLine(result);
+            Console.ResetColor();
+            Console.WriteLine("--------------------------------------");
+            Console.WriteLine("Press any key to return");
+            Console.ReadKey();
         }
 
         public static string GetValidIsbn13()
@@ -364,7 +422,7 @@ namespace AdminTools.Helper
 
             List<string> inventoryOption = combinedData.Select(data => $"ISBN: {data.inventory.Isbn13} - Quantity: {data.inventory.Quantity} - Title: {data.book.Title}").ToList();
 
-            MenuHelper inventoryMenu = new MenuHelper("======== Choose one to update the quantity ========", inventoryOption);
+            MenuHelper inventoryMenu = new MenuHelper("======== Choose a book to edit ========", inventoryOption);
 
             int index = inventoryMenu.ControlChoice();
             string selectedIsbn = combinedData[index].inventory.Isbn13;

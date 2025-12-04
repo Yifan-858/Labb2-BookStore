@@ -77,6 +77,28 @@ namespace Labb2_BookStore.Data
             return "Order is made successfully!";
         }
 
+        public async Task<string> AddAuthor(string firstName,string lastName, DateOnly birthDate)
+        {
+            bool isExist = await _context.Authors.AnyAsync(a => a.FirstName == firstName && a.LastName == lastName && a.BirthDate == birthDate);
+            
+            if(isExist)
+            {
+                throw new InvalidOperationException($"This author is already exist");
+            }
+
+            Author newAuthor = new Author
+            {
+                FirstName = firstName,
+                LastName = lastName,
+                BirthDate = birthDate
+            };
+
+            _context.Authors.Add(newAuthor);
+            await _context.SaveChangesAsync();
+
+            return $"Author {firstName} {lastName} added successfully!";
+
+        }
         //Read
         public async Task<List<Book>> GetAllBooks()
         {
@@ -200,6 +222,20 @@ namespace Labb2_BookStore.Data
             return $"Book({isbn})'s quantiry updated!";
         }
         //Delete
+        public async Task<string> DeleteBookFromInventory(string isbn, int storeId)
+        {
+             var inventory = await _context.Inventories
+                .FirstOrDefaultAsync(i => i.Isbn13 == isbn && i.StoreId == storeId);
 
+            if (inventory == null)
+            {
+                return $"No inventory record found for ISBN {isbn} in store {storeId}.";
+            }
+
+            _context.Inventories.Remove(inventory);
+            await _context.SaveChangesAsync();
+
+            return $"Book: {isbn} has been removed from store {storeId}.";
+        }
     }
 }

@@ -16,8 +16,11 @@ namespace AdminTools
                 Console.WriteLine("=== Company Database Admin Tool ===");
                 Console.WriteLine("1. Add new book title with ISBN");
                 Console.WriteLine("2. Add a new author");
-                Console.WriteLine("3. Send book to a store");
-                Console.WriteLine("4. Edit store inventory");
+                Console.WriteLine("3. Send book to store");
+                Console.WriteLine("4. Edit book quantity in store");
+                Console.WriteLine("5. Delete a book from store");
+                Console.WriteLine("");
+                Console.Write("Your choice: ");
 
                 var choice = Console.ReadLine();
 
@@ -34,12 +37,16 @@ namespace AdminTools
                         Console.ReadKey();
                         break;
                     case "2":
+                        await BookStoreHelper.AddAuthor(db);
                         break;
                     case "3":
                         await BookStoreHelper.AddBookToStore(db);
                         break;
                     case "4":
                         await BookStoreHelper.UpdateInventory(db);
+                        break;
+                    case "5":
+                        await BookStoreHelper.DeleteBookFromStore(db);
                         break;
                     default:
                         Console.WriteLine("Invalid choice");
