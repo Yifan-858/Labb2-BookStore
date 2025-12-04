@@ -16,14 +16,15 @@ namespace AdminTools
                 Console.WriteLine("=== Company Database Admin Tool ===");
                 Console.WriteLine("1. Add new book title with ISBN");
                 Console.WriteLine("2. Add a new author");
-                Console.WriteLine("3. Edit store inventory");
+                Console.WriteLine("3. Send book to a store");
+                Console.WriteLine("4. Edit store inventory");
 
                 var choice = Console.ReadLine();
 
                 switch (choice)
                 {
                     case "1":
-                        var newBook = await BookStoreHelper.CreateBookHelper(db);
+                        var newBook = await BookStoreHelper.CreateBook(db);
                         Console.ForegroundColor = ConsoleColor.DarkGreen;
                         Console.WriteLine("");
                         Console.WriteLine($"A new book is successfully added into database!");
@@ -35,6 +36,9 @@ namespace AdminTools
                     case "2":
                         break;
                     case "3":
+                        await BookStoreHelper.AddBookToStore(db);
+                        break;
+                    case "4":
                         await BookStoreHelper.UpdateInventory(db);
                         break;
                     default:

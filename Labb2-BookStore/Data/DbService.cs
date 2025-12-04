@@ -52,7 +52,47 @@ namespace Labb2_BookStore.Data
             return newBook;
         }
 
+        public async Task<string> SendBookToStore(int storeId,string isbn13,int quantity)
+        {
+            if(await _context.Inventories.AnyAsync(i=>i.Isbn13 == isbn13 && i.StoreId == storeId))
+            {
+                throw new InvalidOperationException($"A book with ISBN:{isbn13} already exists in that store.");
+            }
+
+            if (quantity < 0)
+            {
+                throw new InvalidOperationException($"Book quantity should be a positive intege.");
+            }
+
+            var newInventory = new Inventory
+            {
+                StoreId = storeId,
+                Isbn13 = isbn13,
+                Quantity = quantity
+            };
+
+            _context.Inventories.Add(newInventory);
+            await _context.SaveChangesAsync();
+
+            return "Order is made successfully!";
+        }
+
         //Read
+        public async Task<List<Book>> GetAllBooks()
+        {
+            try
+            {
+                return await _context.Books.ToListAsync();
+            }
+            catch(Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"Database error: Could not fetch books. Detail: {ex.Message}");
+                Console.ResetColor();
+
+                return new List<Book>();
+            }
+        }
         public async Task<List<Author>> GetAllAuthor()
         {
             try
@@ -152,7 +192,7 @@ namespace Labb2_BookStore.Data
         //Update
         public async Task<string> UpdateInventory(string isbn, int quantity, int storeId)
         {
-            var inventory = await _context.Inventories.Where(i => i.StoreId == storeId).FirstOrDefaultAsync();
+            var inventory = await _context.Inventories.Where(i => i.StoreId == storeId && i.Isbn13 == isbn).FirstOrDefaultAsync();
             inventory.Quantity = quantity;
 
             await _context.SaveChangesAsync();

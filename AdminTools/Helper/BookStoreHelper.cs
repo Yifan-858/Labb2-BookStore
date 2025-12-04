@@ -14,7 +14,7 @@ namespace AdminTools.Helper
     public static class BookStoreHelper
     {
         private const string Isbn13Pattern = @"^(978|979)-\d{1,5}-\d{1,7}-\d{1,6}-\d{1}$";
-        public static async Task<Book> CreateBookHelper(DbService db)
+        public static async Task<Book> CreateBook(DbService db)
         {
             Console.Clear();
             Console.WriteLine("======== Create New Book ========");
@@ -31,7 +31,48 @@ namespace AdminTools.Helper
           
             return newBook;
         }
+        public static async Task AddBookToStore(DbService db)
+        {
+            var books = await db.GetAllBooks();
+            List<string> bookOption = books.Select(b => $"ISBN:{b.Isbn13} | {b.Title}").ToList();
 
+            MenuHelper bookMenu = new MenuHelper("======== Select a book to send ========", bookOption);
+            int indexB = bookMenu.ControlChoice();
+            string isbn = books[indexB].Isbn13;
+
+            var stores = await db.GetAllStore();
+            List<string> storeOption = stores.Select(s => $"{s.StoreName} | {s.StoreAddress}").ToList();
+
+            MenuHelper storeMenu = new MenuHelper("======== Select a store to receive the book ========", storeOption);
+            int indexS = storeMenu.ControlChoice();
+            int storeId = stores[indexS].StoreId;
+
+            Console.WriteLine("--------------------------------------");
+            Console.WriteLine("How many copies do you want to send to the store? ");
+            int quantity = -1;
+
+            var userInput = Console.ReadLine();
+            if (int.TryParse(userInput, out int inputQuantity) && inputQuantity>=0)
+            {
+                quantity = inputQuantity;
+            }
+            else
+            {
+                Console.WriteLine("Invalid quantity! Please enter a positive intege.");
+            }
+
+            string result = await db.SendBookToStore(storeId, isbn, quantity);
+            Console.ForegroundColor = ConsoleColor.DarkGreen;
+            Console.WriteLine($"{result}");
+            Console.WriteLine("Order details:");
+            Console.WriteLine($"Book: {isbn}");
+            Console.WriteLine($"StoreID: {storeId}");
+            Console.WriteLine($"Sent copies: {quantity}");
+            Console.ResetColor();
+            Console.WriteLine("--------------------------------------");
+            Console.WriteLine("Press any key to return");
+            Console.ReadKey();
+        }
         public static async Task UpdateInventory(DbService db)
         {
             var data = await ViewStoreInventory(db);
@@ -43,7 +84,7 @@ namespace AdminTools.Helper
 
             var userInput = Console.ReadLine();
 
-            if (int.TryParse(userInput, out int inputQuantity) && inputQuantity>0)
+            if (int.TryParse(userInput, out int inputQuantity) && inputQuantity>=0)
             {
                 newQuantity = inputQuantity;
             }
@@ -326,7 +367,7 @@ namespace AdminTools.Helper
             MenuHelper inventoryMenu = new MenuHelper("======== Choose one to update the quantity ========", inventoryOption);
 
             int index = inventoryMenu.ControlChoice();
-            string selectedIsbn = inventories[index].Isbn13;
+            string selectedIsbn = combinedData[index].inventory.Isbn13;
 
             return selectedIsbn;
         }
