@@ -14,8 +14,9 @@ namespace AdminTools
             {Console.ForegroundColor = ConsoleColor.Gray;
                 Console.Clear();
                 Console.WriteLine("=== Company Database Admin Tool ===");
-                Console.WriteLine("1. Add new book");
-                Console.WriteLine("2. View store inventory");
+                Console.WriteLine("1. Add new book title with ISBN");
+                Console.WriteLine("2. Add a new author");
+                Console.WriteLine("3. Edit store inventory");
 
                 var choice = Console.ReadLine();
 
@@ -32,7 +33,9 @@ namespace AdminTools
                         Console.ReadKey();
                         break;
                     case "2":
-                        await BookStoreHelper.ViewStoreInventory(db);
+                        break;
+                    case "3":
+                        await BookStoreHelper.UpdateInventory(db);
                         break;
                     default:
                         Console.WriteLine("Invalid choice");

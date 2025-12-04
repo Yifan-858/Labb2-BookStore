@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -31,7 +32,39 @@ namespace AdminTools.Helper
             return newBook;
         }
 
-        public static async Task ViewStoreInventory(DbService db)
+        public static async Task UpdateInventory(DbService db)
+        {
+            var data = await ViewStoreInventory(db);
+            Console.WriteLine("");
+            Console.WriteLine("--------------------------------------");
+            Console.WriteLine("How many copies do you have in store? ");
+            Console.WriteLine("Please enther the new quantity(a positive intege):");
+            int newQuantity = -1;
+
+            var userInput = Console.ReadLine();
+
+            if (int.TryParse(userInput, out int inputQuantity) && inputQuantity>0)
+            {
+                newQuantity = inputQuantity;
+            }
+            else
+            {
+                Console.WriteLine("Invalid quantity! Please enter a positive intege.");
+            }
+
+            string isbn = data.Value.isbnToUpdate;
+            int storeId = data.Value.storeId;
+
+            string result = await db.UpdateInventory(isbn,newQuantity,storeId);
+            Console.ForegroundColor = ConsoleColor.DarkGreen;
+            Console.WriteLine($"Updated successfully! ISBN:{isbn} | Quantity is now {newQuantity}");
+            Console.ResetColor();
+            Console.WriteLine("--------------------------------------");
+            Console.WriteLine("Press any key to return");
+            Console.ReadKey();
+        }
+
+        public static async Task<(string isbnToUpdate,int storeId)?> ViewStoreInventory(DbService db)
         {
             Console.Clear();
 
@@ -41,12 +74,12 @@ namespace AdminTools.Helper
             {
                 Console.WriteLine("No stores were found. Press any key to return.");
                 Console.ReadLine();
-                return;
+                return null;
             }
 
-            Console.Clear();
-            Console.WriteLine("======== View Inventory ========");
-            await DisplayInventory(storeId, db);
+            string isbnToUpdate = await GetInventory(storeId, db);
+
+            return (isbnToUpdate,storeId);
         }
 
         public static string GetValidIsbn13()
@@ -247,7 +280,7 @@ namespace AdminTools.Helper
             return storeId;
         }
 
-        public static async Task DisplayInventory(int storeId, DbService db)
+        public static async Task<string> GetInventory(int storeId, DbService db)
         {
             List<Inventory> inventories = await db.GetInventoryByStoreId(storeId);
 
@@ -270,11 +303,16 @@ namespace AdminTools.Helper
                 Console.WriteLine("No book is found.");
             }
 
-            var combinedData = inventories.Zip(books, (inventory, book) => new 
+            var combinedData = new List<(Inventory inventory, Book book)>();
+
+            for(int i = 0; i < inventories.Count; i++)
             {
-                Inventory = inventory,
-                Book = book 
-            }).Where(item=> item.Book != null).ToList();
+                var book = books[i];
+                if (book != null)
+                {
+                    combinedData.Add((inventories[i], book));
+                }
+            }
 
             if (combinedData.Count == 0)
             {
@@ -283,16 +321,14 @@ namespace AdminTools.Helper
                 Console.ResetColor();
             }
 
-            List<string> inventoryBookTitleOption = combinedData.Select(info => $"ISBN: {info.Inventory.Isbn13} - Quantity: {info.Inventory.Quantity} - Title: {info.Book.Title}").ToList();
+            List<string> inventoryOption = combinedData.Select(data => $"ISBN: {data.inventory.Isbn13} - Quantity: {data.inventory.Quantity} - Title: {data.book.Title}").ToList();
 
-            for(int i = 0; i < inventoryBookTitleOption.Count; i++)
-            {
-                Console.WriteLine($"{i + 1}.{inventoryBookTitleOption[i]}");
-            }
-            Console.WriteLine("---------------------------------");
-            Console.WriteLine("");
-            Console.WriteLine("Press any key to return.");
-            Console.ReadKey();
+            MenuHelper inventoryMenu = new MenuHelper("======== Choose one to update the quantity ========", inventoryOption);
+
+            int index = inventoryMenu.ControlChoice();
+            string selectedIsbn = inventories[index].Isbn13;
+
+            return selectedIsbn;
         }
     }
 }

@@ -148,5 +148,18 @@ namespace Labb2_BookStore.Data
 
             return book;
         }
+
+        //Update
+        public async Task<string> UpdateInventory(string isbn, int quantity, int storeId)
+        {
+            var inventory = await _context.Inventories.Where(i => i.StoreId == storeId).FirstOrDefaultAsync();
+            inventory.Quantity = quantity;
+
+            await _context.SaveChangesAsync();
+
+            return $"Book({isbn})'s quantiry updated!";
+        }
+        //Delete
+
     }
 }
