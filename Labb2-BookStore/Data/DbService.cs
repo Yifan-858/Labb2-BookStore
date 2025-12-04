@@ -121,13 +121,14 @@ namespace Labb2_BookStore.Data
             
         }
 
-        public async Task<Book> GetBookByISBN(string isbn)
+        public async Task<Book?> GetBookByISBN(string isbn)
         {
+            string trimmedIsbn = isbn.Trim();
             Book? book = null;
 
             try
             {
-                book = await _context.Books.Where(b => b.Isbn13 == isbn).FirstOrDefaultAsync();
+                book = await _context.Books.Where(b => b.Isbn13.Trim() == trimmedIsbn).FirstOrDefaultAsync();
             }
             catch (Exception ex)
             {

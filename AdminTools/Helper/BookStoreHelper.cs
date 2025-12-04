@@ -259,9 +259,11 @@ namespace AdminTools.Helper
             List<string> bookQuantities = inventories.Select(i => $"{i.Quantity}").ToList();
             List<string> bookISBNs = inventories.Select(i => $"{i.Isbn13}").ToList();
 
-            var bookTasks = bookISBNs.Select(isbn => db.GetBookByISBN(isbn));
-            var bookArray = await Task.WhenAll(bookTasks);
-            List<Book> books = bookArray.ToList();
+            List<Book> books = new List<Book>();
+            foreach(string isbn in bookISBNs)
+            {
+                books.Add(await db.GetBookByISBN(isbn));
+            }
 
             if(books == null || books.Count == 0)
             {
@@ -272,7 +274,7 @@ namespace AdminTools.Helper
             {
                 Inventory = inventory,
                 Book = book 
-            }).ToList();
+            }).Where(item=> item.Book != null).ToList();
 
             if (combinedData.Count == 0)
             {
@@ -281,13 +283,16 @@ namespace AdminTools.Helper
                 Console.ResetColor();
             }
 
-            List<string> inventoryBookTitleOption = combinedData.Select(info => $"Title: {info.Book.Title} - Quantity: {info.Inventory.Quantity} - ISBN: {info.Inventory.Isbn13}").ToList();
+            List<string> inventoryBookTitleOption = combinedData.Select(info => $"ISBN: {info.Inventory.Isbn13} - Quantity: {info.Inventory.Quantity} - Title: {info.Book.Title}").ToList();
 
             for(int i = 0; i < inventoryBookTitleOption.Count; i++)
             {
                 Console.WriteLine($"{i + 1}.{inventoryBookTitleOption[i]}");
             }
             Console.WriteLine("---------------------------------");
+            Console.WriteLine("");
+            Console.WriteLine("Press any key to return.");
+            Console.ReadKey();
         }
     }
 }
